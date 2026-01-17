@@ -20,11 +20,6 @@ export const HeroSection = () => {
       
       {/* Floating Elements */}
       <motion.div
-        animate={{ y: [-10, 10, -10] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/4 left-[10%] w-20 h-20 rounded-2xl bg-accent/20 backdrop-blur-xl border border-accent/30 hidden lg:block"
-      />
-      <motion.div
         animate={{ y: [10, -10, 10] }}
         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
         className="absolute bottom-1/3 right-[15%] w-16 h-16 rounded-full bg-primary/20 backdrop-blur-xl border border-primary/30 hidden lg:block"
