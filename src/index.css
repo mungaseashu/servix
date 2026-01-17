@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+  
+   --background: 0 0% 98%;
+  --foreground: 240 10% 10%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 10%;
+
+  --primary: 240 6% 18%;       /* Graphite */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 220 10% 90%;
+  --secondary-foreground: 240 6% 18%;
+
+  --accent: 210 100% 55%;     /* iOS Blue */
+  --accent-foreground: 0 0% 100%;
+
+  --muted: 220 10% 92%;
+  --muted-foreground: 240 4% 45%;
+
+  --border: 220 10% 88%;
+  --ring: 210 100% 55%;
+
+
+    --radius: 1rem;
+
+    /* Custom tokens */
+    --indigo-deep: 233 47% 20%;
+    --indigo-medium: 233 47% 35%;
+    --indigo-light: 233 47% 55%;
+    --teal-vibrant: 174 72% 45%;
+    --teal-light: 174 72% 65%;
+    --teal-dark: 174 72% 30%;
+    
+    /* Glassmorphism */
+    --glass-bg: 0 0% 100% / 0.7;
+    --glass-border: 0 0% 100% / 0.3;
+    --glass-blur: 20px;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(233 47% 25%), hsl(233 47% 40%));
+    --gradient-accent: linear-gradient(135deg, hsl(174 72% 45%), hsl(174 72% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(233 47% 12%), hsl(233 47% 22%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100% / 0.9), hsl(0 0% 100% / 0.6));
+    --gradient-mesh: radial-gradient(at 40% 20%, hsl(174 72% 45% / 0.15) 0px, transparent 50%),
+                     radial-gradient(at 80% 0%, hsl(233 47% 35% / 0.1) 0px, transparent 50%),
+                     radial-gradient(at 0% 50%, hsl(174 72% 65% / 0.1) 0px, transparent 50%);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 174 72% 45%;
+  }
+
+  .dark {
+    --background: 233 47% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 233 47% 12%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 233 47% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 174 72% 50%;
+    --primary-foreground: 233 47% 10%;
+
+    --secondary: 233 40% 25%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 233 40% 18%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 174 72% 45%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 45%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 233 40% 20%;
+    --input: 233 40% 20%;
+    --ring: 174 72% 50%;
+
+    --sidebar-background: 233 47% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 174 72% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 233 40% 18%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 233 40% 18%;
+    --sidebar-ring: 174 72% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-xl border border-white/30 shadow-xl;
+  }
+
+  .glass-card-dark {
+    @apply bg-black/20 backdrop-blur-xl border border-white/10;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-indigo-medium to-accent bg-clip-text text-transparent;
+  }
+
+  .gradient-text-teal {
+    @apply bg-gradient-to-r from-accent to-teal-light bg-clip-text text-transparent;
+  }
+
+  .bento-grid {
+    @apply grid gap-4 auto-rows-[minmax(180px,auto)];
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .mesh-gradient {
+    background: var(--gradient-mesh);
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
