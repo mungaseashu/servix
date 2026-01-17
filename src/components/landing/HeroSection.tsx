@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 const stats = [
-  { value: "50K+", label: "Happy Customers", icon: Star },
+  { value: "100k+", label: "Happy Customers", icon: Star },
   { value: "2000+", label: "Verified Pros", icon: Shield },
   { value: "24/7", label: "Support", icon: Clock },
 ];
