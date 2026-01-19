@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Home, Wrench, Users, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import UserProfileDropdown from "./UserProfileDropdown";
+import { isAuthenticated, getUserRole } from "@/services/api";
 
 const navLinks = [
   { name: "Home", href: "/", icon: Home },
@@ -12,6 +14,15 @@ const navLinks = [
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticatedUser, setIsAuthenticatedUser] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const authStatus = isAuthenticated();
+    const role = getUserRole();
+    setIsAuthenticatedUser(authStatus);
+    setUserRole(role);
+  }, []);
 
   return (
     <motion.nav
@@ -37,35 +48,89 @@ export const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link key={link.name} to={link.href}>
+            {/* Show links based on user role */}
+            {!userRole && (
+              <>
+                {navLinks.map((link) => (
+                  <Link key={link.name} to={link.href}>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="px-4 py-2 rounded-xl hover:text-gray-600 hover:bg-gray-100 transition-colors font-medium flex items-center gap-2 text-lg"
+                      style={{ color: '#000000' }}
+                    >
+                      <link.icon className="w-4 h-4" />
+                      {link.name}
+                    </motion.div>
+                  </Link>
+                ))}
+              </>
+            )}
+            
+            {/* Customer (user) can see Home and Services */}
+            {userRole === 'user' && (
+              <>
+                <Link to="/">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-4 py-2 rounded-xl hover:text-gray-600 hover:bg-gray-100 transition-colors font-medium flex items-center gap-2 text-lg"
+                    style={{ color: '#000000' }}
+                  >
+                    <Home className="w-4 h-4" />
+                    Home
+                  </motion.div>
+                </Link>
+                <Link to="/services">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-4 py-2 rounded-xl hover:text-gray-600 hover:bg-gray-100 transition-colors font-medium flex items-center gap-2 text-lg"
+                    style={{ color: '#000000' }}
+                  >
+                    <Wrench className="w-4 h-4" />
+                    Services
+                  </motion.div>
+                </Link>
+              </>
+            )}
+            
+            {/* Provider can see Collab Hub */}
+            {userRole === 'provider' && (
+              <Link to="/collabhub">
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.98 }}
                   className="px-4 py-2 rounded-xl hover:text-gray-600 hover:bg-gray-100 transition-colors font-medium flex items-center gap-2 text-lg"
                   style={{ color: '#000000' }}
                 >
-                  <link.icon className="w-4 h-4" />
-                  {link.name}
+                  <Users className="w-4 h-4" />
+                  Collab Hub
                 </motion.div>
               </Link>
-            ))}
+            )}
           </div>
 
-          {/* Auth Buttons - Desktop */}
+          {/* Auth Section - Desktop */}
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/login">
-              <Button variant="outline" size="sm" className="gap-2">
-                <LogIn className="w-4 h-4" />
-                Sign In
-              </Button>
-            </Link>
-            <Link to="/signup">
-              <Button variant="outline" size="sm" className="gap-2">
-                <UserPlus className="w-4 h-4" />
-                Get Started
-              </Button>
-            </Link>
+            {isAuthenticatedUser ? (
+              <UserProfileDropdown />
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <LogIn className="w-4 h-4" />
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <UserPlus className="w-4 h-4" />
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -89,37 +154,103 @@ export const Navbar = () => {
               transition={{ duration: 0.2 }}
               className="md:hidden mt-2 bg-white border border-gray-200 rounded-2xl p-4 space-y-2 shadow-lg"
             >
-              {navLinks.map((link, index) => (
+              {/* Mobile Navigation Links */}
+              {!userRole && (
+                <>
+                  {navLinks.map((link, index) => (
+                    <motion.div
+                      key={link.name}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Link
+                        to={link.href}
+                        className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent/10 transition-colors"
+                        onClick={() => setIsOpen(false)}
+                        style={{ color: '#000000' }}
+                      >
+                        <link.icon className="w-5 h-5 text-accent" />
+                        <span className="font-medium">{link.name}</span>
+                      </Link>
+                    </motion.div>
+                  ))}
+                </>
+              )}
+
+              {userRole === 'user' && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <Link
+                      to="/"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent/10 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                      style={{ color: '#000000' }}
+                    >
+                      <Home className="w-5 h-5 text-accent" />
+                      <span className="font-medium">Home</span>
+                    </Link>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <Link
+                      to="/services"
+                      className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent/10 transition-colors"
+                      onClick={() => setIsOpen(false)}
+                      style={{ color: '#000000' }}
+                    >
+                      <Wrench className="w-5 h-5 text-accent" />
+                      <span className="font-medium">Services</span>
+                    </Link>
+                  </motion.div>
+                </>
+              )}
+
+              {userRole === 'provider' && (
                 <motion.div
-                  key={link.name}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
+                  transition={{ delay: 0.1 }}
                 >
                   <Link
-                    to={link.href}
+                    to="/collabhub"
                     className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent/10 transition-colors"
                     onClick={() => setIsOpen(false)}
                     style={{ color: '#000000' }}
                   >
-                    <link.icon className="w-5 h-5 text-accent" />
-                    <span className="font-medium">{link.name}</span>
+                    <Users className="w-5 h-5 text-accent" />
+                    <span className="font-medium">Collab Hub</span>
                   </Link>
                 </motion.div>
-              ))}
+              )}
+
+              {/* Mobile Auth Section */}
               <div className="pt-2 border-t border-border space-y-2">
-                <Link to="/login" onClick={() => setIsOpen(false)}>
-                  <Button variant="outline" className="w-full gap-2">
-                    <LogIn className="w-4 h-4" />
-                    Sign In
-                  </Button>
-                </Link>
-                <Link to="/signup" onClick={() => setIsOpen(false)}>
-                  <Button variant="outline" className="w-full gap-2">
-                    <UserPlus className="w-4 h-4" />
-                    Get Started
-                  </Button>
-                </Link>
+                {isAuthenticatedUser ? (
+                  <UserProfileDropdown />
+                ) : (
+                  <>
+                    <Link to="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full gap-2">
+                        <LogIn className="w-4 h-4" />
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link to="/signup" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full gap-2">
+                        <UserPlus className="w-4 h-4" />
+                        Get Started
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </motion.div>
           )}

@@ -3,55 +3,50 @@ import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, ArrowRight, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
+import { login } from "@/services/api";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Basic validation
     if (!email.trim() || !password.trim()) {
-      alert('Please enter both email and password');
+      setError('Please enter both email and password');
       return;
     }
     
-    // Simulate login logic
-    console.log("Login attempt:", { email, password });
+    setLoading(true);
+    setError("");
     
-    // For demo purposes, accept any email/password
-    const userData = {
-      email: email,
-      name: email.split('@')[0], // Extract name from email
-      role: email.includes('provider') ? 'provider' : 'user', // Simple role detection
-      loginTime: new Date().toISOString()
-    };
-    
-    // Store user data in localStorage
-    localStorage.setItem('user', JSON.stringify(userData));
-    
-    console.log("Login successful:", userData);
-    
-    // Show success message and navigate
-    alert('Login successful! Redirecting to dashboard...');
-    
-    // Navigate based on role after a short delay
-    setTimeout(() => {
-      if (userData.role === 'provider') {
-        navigate('/dashboard');
+    try {
+      // Call backend login API
+      const result = await login({ email, password });
+      
+      if (result.success) {
+        console.log("Login successful:", result.data);
+        
+        // Navigate based on role immediately
+        if (result.data.user.role === 'provider') {
+          navigate('/dashboard');
+        } else {
+          navigate('/');
+        }
       } else {
-        navigate('/');
+        setError(result.error || 'Login failed. Please try again.');
       }
-    }, 1000);
-    
-    // In a real app, you would:
-    // 1. Validate credentials against backend
-    // 2. Get user data including role
-    // 3. Create session/token
-    // 4. Redirect to appropriate dashboard
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -165,6 +160,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
+                disabled={loading}
                 className="w-full pl-12 pr-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
               />
             </div>
@@ -185,23 +181,41 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
+                disabled={loading}
                 className="w-full pl-12 pr-12 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                disabled={loading}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 rounded-lg bg-red-100 border border-red-400 text-red-700">
+              {error}
+            </div>
+          )}
+
           {/* Submit */}
           <div className="relative z-10">
-            <Button type="submit" variant="hero" size="lg" className="w-full gap-2">
-              Sign In
-              <ArrowRight className="w-4 h-4" />
+            <Button type="submit" variant="hero" size="lg" className="w-full gap-2" disabled={loading}>
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-transparent animate-spin rounded-full"></div>
+                  Signing In...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </Button>
           </div>
         </form>

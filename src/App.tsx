@@ -7,10 +7,12 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import ProviderDashboard from "./pages/ProviderDashboard";
 import Services from "./pages/Services";
 import ServicesPage from "./pages/ServicesPage";
 import CollabHub from "./pages/CollabHub";
 import NotFound from "./pages/NotFound";
+import ProtectedRoute from "@/components/layout/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -24,10 +26,38 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/services-page" element={<ServicesPage />} />
-          <Route path="/collab-hub" element={<CollabHub />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute allowedRoles={['provider']}>
+                <ProviderDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/services" 
+            element={
+              <ProtectedRoute allowedRoles={['user']}>
+                <Services />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/services-page" 
+            element={
+              <ProtectedRoute allowedRoles={['user']}>
+                <ServicesPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/collabhub" 
+            element={
+              <ProtectedRoute allowedRoles={['provider']}>
+                <CollabHub />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

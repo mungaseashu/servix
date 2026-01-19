@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
+import { register } from "@/services/api";
 
 const steps = [
   { id: 1, title: "Role", description: "Choose your role" },
@@ -36,13 +37,21 @@ const Signup = () => {
     location: "",
     specialty: "",
   });
-  const [errors, setErrors] = useState({
+  const [errors, setErrors] = useState<{
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+    location: string;
+    general?: string;
+  }>({
     name: "",
     email: "",
     phone: "",
     password: "",
     location: "",
   });
+  const [loading, setLoading] = useState(false);
 
   const handleNext = () => {
     if (currentStep < 3) setCurrentStep(currentStep + 1);
@@ -52,7 +61,7 @@ const Signup = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form
@@ -70,15 +79,26 @@ const Signup = () => {
     const hasErrors = Object.values(newErrors).some(error => error !== "");
     
     if (!hasErrors) {
-      // Simulate account creation
-      const userData = { ...formData, role };
-      console.log("Creating account:", userData);
+      setLoading(true);
       
-      // Store user data in localStorage for demo purposes
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      // Navigate to next step
-      handleNext();
+      try {
+        // Call backend register API
+        const result = await register({ ...formData, role });
+        
+        if (result.success) {
+          console.log("Account created successfully:", result.data);
+          
+          // Navigate to next step immediately
+          handleNext();
+        } else {
+          setErrors(prev => ({ ...prev, general: result.error }));
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        setErrors({ ...errors, general: 'Network error. Please try again.' });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -258,6 +278,7 @@ const Signup = () => {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="John Doe"
+                        disabled={loading}
                         className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-background focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent ${
                           errors.name ? "border-red-500" : "border-border"
                         }`}
@@ -278,6 +299,7 @@ const Signup = () => {
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         placeholder="john@example.com"
+                        disabled={loading}
                         className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-background focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent ${
                           errors.email ? "border-red-500" : "border-border"
                         }`}
@@ -298,6 +320,7 @@ const Signup = () => {
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         placeholder="+1 (555) 123-4567"
+                        disabled={loading}
                         className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-background focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent ${
                           errors.phone ? "border-red-500" : "border-border"
                         }`}
@@ -319,6 +342,7 @@ const Signup = () => {
                           value={formData.location}
                           onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                           placeholder="New York, NY"
+                          disabled={loading}
                           className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-background focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent ${
                             errors.location ? "border-red-500" : "border-border"
                           }`}
@@ -340,6 +364,7 @@ const Signup = () => {
                         value={formData.password}
                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                         placeholder="Create a strong password"
+                        disabled={loading}
                         className={`w-full pl-12 pr-12 py-3 rounded-xl border bg-background focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent ${
                           errors.password ? "border-red-500" : "border-border"
                         }`}
@@ -348,6 +373,7 @@ const Signup = () => {
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        disabled={loading}
                       >
                         {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                       </button>
@@ -357,9 +383,25 @@ const Signup = () => {
                     )}
                   </div>
 
-                  <Button type="submit" variant="hero" size="lg" className="w-full gap-2">
-                    Create Account
-                    <ArrowRight className="w-4 h-4" />
+                  {/* General Error */}
+                  {errors.general && (
+                    <div className="mb-4 p-3 rounded-lg bg-red-100 border border-red-400 text-red-700">
+                      {errors.general}
+                    </div>
+                  )}
+
+                  <Button type="submit" variant="hero" size="lg" className="w-full gap-2" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-transparent animate-spin rounded-full"></div>
+                        Creating Account...
+                      </>
+                    ) : (
+                      <>
+                        Create Account
+                        <ArrowRight className="w-4 h-4" />
+                      </>
+                    )}
                   </Button>
                 </form>
               </motion.div>
